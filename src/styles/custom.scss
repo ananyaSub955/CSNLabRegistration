@@ -1,0 +1,21 @@
+@import "bootstrap/scss/functions";
+@import "bootstrap/scss/variables";
+
+$primary: #012168;
+$secondary: #ffd200;
+
+//adding another color
+$custom-colors: (
+    "one" : #012168,
+    "two":#ffd200
+  "tertiary": #b3c8de
+);
+
+// Merge it into the default Bootstrap color map
+$theme-colors: map-merge(
+  $theme-colors,
+  $custom-colors
+);
+
+
+@import "bootstrap/scss/bootstrap";

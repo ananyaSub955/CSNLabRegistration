@@ -1,4 +1,4 @@
-*{
+/* *{
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -57,4 +57,24 @@ a.active{
 .container h1{
   font-size: 71px;
   font-weight: 500;
+} */
+@font-face {
+  font-family: 'Optima';
+  src: url('./assets/OPTIMA_B.woff2') format('woff2'),
+    url('./assets/OPTIMA.woff2') format('woff2'),
+    url('./assets/OptimaMedium.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+}
+
+*{
+ font-family: 'Optima';
+}
+
+#navbar {
+  font-size: large;
+}
+
+.custom-btn{
+  background-color: #012168;
 }

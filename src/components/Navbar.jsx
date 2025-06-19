@@ -1,25 +1,39 @@
-import React from 'react'
-import logo from '../assets/logo.png'
-//import { Link } from 'react-router-dom'
-import { NavLink, useNavigate} from 'react-router-dom'
+import React from 'react';
+import logo from '../assets/logo.png';
+import { NavLink, useNavigate } from 'react-router-dom';
+// import './Navbar.css'; 
 
-const Navbar = () =>{
+const Navbar = () => {
+  //const navigate = useNavigate();
 
-    const navigate = useNavigate()
+  return (
+    <nav className="navbar navbar-expand-sm bg-light px-4" id= "navbar">
+      <a className="navbar-brand" href="/">
+        <img src={logo} alt="CSN logo" style={{ width: '200px' }} />
+      </a>
+      <div className="container-fluid">
 
-  return(
-    <div className='navbar'>
-        <img className='logo' src ={logo} alt = "CSN logo"></img>
-        <ul>
-            <NavLink to = '/'><li>Login</li></NavLink>
-            <NavLink to = '/logentry'><li>Log an Entry</li></NavLink>
-            <NavLink to = '/history'><li>Student History</li></NavLink>
-            <NavLink to = '/jobs'><li>Jobs</li></NavLink>
-
+        <ul className="navbar-nav ms-auto fs-5">
+          <li className="nav-item">
+            <NavLink className="nav-link" to="/">Login</NavLink>
+          </li>
+          <li className="nav-item">
+            <NavLink className="nav-link" to="/logentry">Log an Entry</NavLink>
+          </li>
+          <li className="nav-item">
+            <NavLink className="nav-link" to="/history">Student History</NavLink>
+          </li>
+          <li className="nav-item">
+            <NavLink className="nav-link" to="/jobs">Jobs</NavLink>
+          </li>
         </ul>
-        <button onClick={() => navigate('/history')}> Get started </button>
-    </div>
-  )
-}
+{/* 
+        <button className="btn btn-primary" onClick={() => navigate('/history')}>
+          Get started
+        </button> */}
+      </div>
+    </nav>
+  );
+};
 
-export default Navbar
+export default Navbar;
