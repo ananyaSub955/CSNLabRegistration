@@ -1,0 +1,22 @@
+{
+    "jobs": [
+        {
+            "id": 1,
+            "title": "blah",
+            "salary": 55,
+            "location": "blah"
+        },
+        {
+            "id": 2,
+            "title": "bleh",
+            "salary": 65,
+            "location": "bleh"
+        },
+        {
+            "id": 3,
+            "title": "bluh",
+            "salary": 650,
+            "location": "bluh"
+        }
+    ]
+}

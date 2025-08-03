@@ -1,0 +1,22 @@
+@import "bootstrap/scss/functions";
+@import "bootstrap/scss/variables";
+
+// $primary: #012168;
+// $secondary: #ffd200;
+
+//adding another color
+$custom-colors: (
+    "blue" : #012168,
+    "yellow":#ffd200,
+  "lightBlue": #b3c8de,
+  "black": #000000
+);
+
+// Merge it into the default Bootstrap color map
+$theme-colors: map-merge(
+  $theme-colors,
+  $custom-colors
+);
+
+
+@import "bootstrap/scss/bootstrap";
