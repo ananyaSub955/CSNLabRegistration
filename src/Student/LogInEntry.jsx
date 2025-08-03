@@ -66,7 +66,7 @@ const LogInEntry = () => {
             name="timeOut"
           />
         </div>
-         <button type="submit" className="btn btn-one">
+         <button type="submit" className="btn btn-blue">
           Submit
         </button>
       </form>

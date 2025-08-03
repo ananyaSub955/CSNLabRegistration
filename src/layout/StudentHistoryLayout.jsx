@@ -1,5 +1,5 @@
 import React from 'react'
-import StudentHistory from '../pages/StudentHistory'
+import StudentHistory from '../Student/StudentHistory'
 import { Outlet } from 'react-router-dom'
 
 const StudentHistoryLayout = () => {

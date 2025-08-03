@@ -58,6 +58,11 @@ a.active{
   font-size: 71px;
   font-weight: 500;
 } */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 @font-face {
   font-family: 'Optima';
   src: url('./assets/OPTIMA_B.woff2') format('woff2'),
@@ -65,7 +70,8 @@ a.active{
     url('./assets/OptimaMedium.woff2') format('woff2');
   font-weight: normal;
   font-style: normal;
-}
+} 
+
 
 *{
  font-family: 'Optima';
@@ -75,6 +81,20 @@ a.active{
   font-size: large;
 }
 
-.custom-btn{
+/* .custom-btn{
   background-color: #012168;
+} */
+
+/* .form-control.black-text {
+  color: #000000 !important;
+} */
+
+
+/* Solution 1: More specific CSS selector */
+input[type="password"].form-control {
+  color: #000000 !important;
+}
+
+input[type="password"] {
+  font-family: system-ui, sans-serif !important;
 }

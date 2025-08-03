@@ -1,43 +1,47 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
+
+  const navigate = useNavigate();
+
   return (
-    <div className="container mt-5" style={{ maxWidth: '400px' }}>
-      <h1> Login </h1>
-      <form>
+    <div className="container mt-5 fs-4" style={{ maxWidth: '400px' }}>
+      <h1 className="text-blue p-3 text-center fw-bold">
+        <b>Login</b>
+      </h1>
+      <form className='bg-blue p-3 rounded'>
         <div className="mb-3 mt-3">
-          <label htmlFor="email" className="form-label">Email:</label>
+          <label htmlFor="email" className="form-label text-white">Email:</label>
           <input
             type="email"
-            className="form-control"
+            className="bg-lightBlue form-control"
             id="email"
             placeholder="Enter email"
             name="email"
           />
         </div>
         <div className="mb-3">
-          <label htmlFor="pwd" className="form-label">Password:</label>
+          <label htmlFor="pwd" className="form-label text-white">Password:</label>
           <input
             type="password"
-            className="form-control"
+            className="bg-lightBlue form-control"
             id="pwd"
             placeholder="Enter password"
             name="pswd"
           />
         </div>
-        <div className="form-check mb-3">
-          <input
-            className="form-check-input"
-            type="checkbox"
-            id="remember"
-            name="remember"
-          />
-          <label className="form-check-label" htmlFor="remember">
-            Remember me
-          </label>
-        </div>
-        <button type="submit" className="btn btn-one">
-          Submit
+        <p className='mt-4 text-white fs-5'>
+          Don't have an account?{' '}
+          <span
+            onClick={() => navigate('/signUp')}
+            style={{ cursor: 'pointer', textDecoration: 'underline' }}
+          >
+            Sign up Here
+          </span>
+        </p>
+        <button type="submit" className="btn btn-yellow fs-4">
+          Login
         </button>
       </form>
     </div>

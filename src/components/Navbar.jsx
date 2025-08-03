@@ -17,7 +17,10 @@ const Navbar = () => {
           <li className="nav-item">
             <NavLink className="nav-link" to="/">Login</NavLink>
           </li>
-          <li className="nav-item">
+          {/* <li className="nav-item">
+            <NavLink className="nav-link" to="/signUp">Sign Up</NavLink>
+          </li> */}
+          {/* <li className="nav-item">
             <NavLink className="nav-link" to="/logentry">Log an Entry</NavLink>
           </li>
           <li className="nav-item">
@@ -25,7 +28,7 @@ const Navbar = () => {
           </li>
           <li className="nav-item">
             <NavLink className="nav-link" to="/jobs">Jobs</NavLink>
-          </li>
+          </li> */}
         </ul>
 {/* 
         <button className="btn btn-primary" onClick={() => navigate('/history')}>
