@@ -3,6 +3,7 @@ import Login from './pages/Login'
 import LogInEntry from './Student/LogInEntry.jsx';
 import { Route, createBrowserRouter, createRoutesFromElements, RouterProvider } from 'react-router-dom'
 import RootLayout from './layout/RootLayout';
+import StudentLayout from './Student/layout/StudentLayout.jsx'
 import StudentHistoryLayout from './layout/StudentHistoryLayout';
 import HistoryDate from './components/HistoryDate';
 import HistoryForm from './components/HistoryForm.jsx';
@@ -12,6 +13,7 @@ import Jobs, { jobsLoader } from './pages/Jobs.jsx';
 import JobDetails, { JobDetailsLoader } from './components/JobDetails.jsx';
 import Error from './components/Error.jsx';
 import SignUp from './pages/SignUp.jsx';
+import EditEntry from './Student/components/EditEntry.jsx';
 
 
 const App = () => {
@@ -25,18 +27,10 @@ const App = () => {
         <Route path='*' element={<NotFound />} />
       </Route>
 
-      <Route path='student' element={<LogInEntry />}>
+      <Route path='student' element={<StudentLayout />}>
         <Route path='logentry' element={<LogInEntry />} />
         <Route path='history' element={<StudentHistoryLayout />} />
-
-        {/* <Route path='history' element={<StudentHistoryLayout />}>
-          <Route path='date' element={<HistoryDate />} />
-          <Route path='form' element={<HistoryForm />} />
-        </Route> */}
-        {/* <Route path='jobs' element={<JobsLayout />} errorElement = {<Error/>}>
-          <Route index element={<Jobs />} loader={jobsLoader} />
-          <Route path=':id' element={<JobDetails />} loader = {JobDetailsLoader} />
-        </Route> */}
+        <Route path="editEntry/:id" element={<EditEntry />} />
         <Route path='*' element={<NotFound />} />
       </Route>
       </>
