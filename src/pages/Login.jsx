@@ -98,7 +98,7 @@ const Login = () => {
         </p>
 
         <div className="d-flex justify-content-center mt-4">
-          <button type="submit" className="btn btn-yellow fs-4">
+          <button type="submit" className="btn btn-yellow fs-4 mb-5">
             Login
           </button>
         </div>

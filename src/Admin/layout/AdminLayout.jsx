@@ -1,6 +1,7 @@
 import React from 'react'
 import AdminNavbar from '../components/AdminNavbar'
 import { Outlet } from 'react-router-dom'
+import Footer from '../../components/Footer'
 
 const AdminLayout = () => {
   return (
@@ -9,7 +10,7 @@ const AdminLayout = () => {
       <main className="flex-1 overflow-auto">
         <Outlet />
       </main>
-      {/* <Footer /> */}
+      <Footer />
     </div>
 
   )

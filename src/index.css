@@ -98,3 +98,7 @@ input[type="password"].form-control {
 input[type="password"] {
   font-family: system-ui, sans-serif !important;
 }
+
+.footer{
+  position: absolute;
+}
