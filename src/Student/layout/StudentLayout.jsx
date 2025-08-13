@@ -1,7 +1,7 @@
 import React from 'react'
 import { Outlet } from 'react-router-dom'
 import StudentNavbar from '../components/StudentNavbar'
-// import Footer from '../../components/Footer'
+import Footer from '../../components/Footer'
 
 const UserLayout = () => {
 
@@ -11,7 +11,7 @@ const UserLayout = () => {
       <main className="flex-1 overflow-auto">
         <Outlet />
       </main>
-      {/* <Footer /> */}
+      <Footer />
     </div>
 
   )

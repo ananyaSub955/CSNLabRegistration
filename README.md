@@ -15,4 +15,5 @@ If you are developing a production application, we recommend using TypeScript wi
 - Using Node.js, React, MongoDB, and Bootstrap
 https://www.csn.edu/sites/default/files/documents/csnstyleguidemanual.pdf
 https://www.captaincodeman.com/dealing-with-dialogs-in-svelte
+https://mdbootstrap.com/snippets/standard/mdbootstrap/2885137?view=side
 
