@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 const url = window.location.hostname === "localhost"
   ? "http://localhost:5000"
-  : "https://itws-4500-s25-team6.eastus.cloudapp.azure.com/node";
+  : "https://itws-4500-s25-team6.eastus.cloudapp.azure.com";
 
 const Login = () => {
 
@@ -16,6 +16,9 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
 
+    // console.log("Attempting login with:", { email, password: "***" });
+    // console.log("URL:", `${url}/login`);
+
     try {
       const response = await fetch(`${url}/login`, {
         method: 'POST',
@@ -27,7 +30,9 @@ const Login = () => {
       const data = await response.json();
 
       if (response.ok && data.success) {
-        navigate('/student/logentry');
+        const roleResponse = await fetch(`${url}/session`, { credentials: "include" });
+        const user = await roleResponse.json();
+        redirectToDashboard(user);
       } else {
         setError(data.message || 'Login failed');
       }
@@ -36,6 +41,15 @@ const Login = () => {
       setError('Something went wrong. Try again.');
     }
   };
+
+  const redirectToDashboard = ({ isProf}) => {
+    if (isProf) {
+      navigate('/admin/dashboard');
+    } else {
+      navigate('/student/logentry');
+    }
+  };
+
 
   return (
     <div className="container mt-5 fs-4" style={{ maxWidth: '400px' }}>
@@ -76,7 +90,7 @@ const Login = () => {
         <p className='mt-4 text-white fs-5'>
           Don't have an account?{' '}
           <span
-            onClick={() => navigate('/signUp')}
+            onClick={() => navigate('/signUpPage')}
             style={{ cursor: 'pointer', textDecoration: 'underline' }}
           >
             Sign up Here
