@@ -73,7 +73,8 @@ const StudentHistory = () => {
 
       const data = await res.json();
       if (data.success) {
-        alert("Entry reused successfully!");
+        window.location.reload()
+        //alert("Entry reused successfully!");
       }
     } catch (error) {
       console.error("Reuse failed", error);

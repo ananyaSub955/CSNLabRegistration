@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 //import { useNavigate } from 'react-router-dom'
 
 const url = window.location.hostname === "localhost"
@@ -14,6 +14,29 @@ const LogInEntry = () => {
   const [timeOut, setTimeOut] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [profs, setProfs] = useState([]);
+  const [profId, setProfId] = useState('');
+
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch(`${url}/profs`, { credentials: 'include' });
+        if (!res.ok) {
+          // Log the text body for easier debugging when it's not JSON
+          const text = await res.text();
+          throw new Error(`Failed to load profs (${res.status}): ${text.slice(0, 120)}...`);
+        }
+        const data = await res.json();
+        if (data.success) setProfs(data.profs);
+        else throw new Error(data.message || "Unknown error loading profs");
+      } catch (err) {
+        console.error("Error fetching professors:", err);
+        setProfs([]); // optional: fallback to empty list
+      }
+    })();
+  }, []);
+
 
 
   const handleEntry = async (e) => {
@@ -23,17 +46,20 @@ const LogInEntry = () => {
       const response = await fetch(`${url}/logEntry`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ roomNum, date, profName, timeIn, timeOut }),
+        body: JSON.stringify({ roomNum, date, profName, profId, timeIn, timeOut }),
         credentials: 'include',
       });
-      // const data = await response.json();
 
-      // if (response.ok && data.success) {
+      let payloadText = await response.text();
+      let payload;
+      try { payload = JSON.parse(payloadText); } catch { payload = { message: payloadText }; }
 
-      //   navigate('/student/logentry');
-      // } else {
-      //   setError(data.message || 'Login failed');
-      // }
+      if (!response.ok || !payload.success) {
+        setSuccess(false);
+        setError(payload.message || `Failed (${response.status})`);
+        return;
+      }
+
 
       setSuccess(true);
       setRoomNum('');
@@ -81,19 +107,33 @@ const LogInEntry = () => {
             required
           />
         </div>
-        <div className="mb-3  fs-4">
-          <label htmlFor="profName" className="form-label text-white">Professor/Admin's Name:</label>
-          <input
-            type="text"
-            className="bg-lightBlue form-control fs-5"
+        <div className="mb-3 fs-4">
+          <label htmlFor="profName" className="form-label text-white">
+            Professor/Admin:
+          </label>
+          <select
             id="profName"
-            placeholder="Enter Professor/Admin's Name"
-            name="profName"
-            value={profName}
-            onChange={(e) => setProfName(e.target.value)}
+            className="bg-lightBlue form-control fs-5"   // <-- moved styling here
+            value={profId}
+            onChange={(e) => {
+              const selected = profs.find(p => p._id === e.target.value);
+              //console.log(selected);
+              setProfId(e.target.value);
+              setProfName(selected ? `${selected.firstName} ${selected.lastName}` : '');
+            }}
             required
-          />
+          >
+            <option value="" disabled>
+              Select a Professor
+            </option>
+            {profs.map((p) => (
+              <option key={p._id} value={p._id}>
+                {p.firstName} {p.lastName}
+              </option>
+            ))}
+          </select>
         </div>
+
         <div className="mb-3  fs-4">
           <label htmlFor="timeIn" className="form-label text-white">Time in:</label>
           <input

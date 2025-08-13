@@ -14,6 +14,8 @@ import JobDetails, { JobDetailsLoader } from './components/JobDetails.jsx';
 import Error from './components/Error.jsx';
 import SignUp from './pages/SignUp.jsx';
 import EditEntry from './Student/components/EditEntry.jsx';
+import AdminLayout from './Admin/layout/AdminLayout.jsx';
+import AdminDashboard from './Admin/AdminDashboard.jsx';
 
 
 const App = () => {
@@ -23,7 +25,7 @@ const App = () => {
       <>
       <Route path='/' element={<RootLayout />}>
         <Route index element={<Login />} />
-        <Route path = 'signUp' element={<SignUp />} />
+        <Route path = 'signUpPage' element={<SignUp />} />
         <Route path='*' element={<NotFound />} />
       </Route>
 
@@ -31,6 +33,11 @@ const App = () => {
         <Route path='logentry' element={<LogInEntry />} />
         <Route path='history' element={<StudentHistoryLayout />} />
         <Route path="editEntry/:id" element={<EditEntry />} />
+        <Route path='*' element={<NotFound />} />
+      </Route>
+
+      <Route path='admin' element={<AdminLayout />}>
+        <Route path='dashboard' element={<AdminDashboard />} />
         <Route path='*' element={<NotFound />} />
       </Route>
       </>

@@ -1,9 +1,12 @@
 const express = require('express');
 const cors = require('cors');
+const bodyParser = require('body-parser');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config({ path: 'config.env' });
 
 const app = express();
+app.use(bodyParser.json());
+
 const PORT = 5000;
 
 app.use(express.json());
@@ -15,6 +18,7 @@ app.use(express.urlencoded({ extended: true }));
 const bcrypt = require("bcryptjs");
 
 const uri = process.env.MONGOURL;
+//const { data } = require('react-router-dom');
 
 const client = new MongoClient(uri, {
     serverApi: {
@@ -41,12 +45,27 @@ app.use(cors({
     credentials: true,
 }));
 
+// const allowedOrigins = [
+//   'http://localhost:5173',
+//   'https://itws-4500-s25-team6.eastus.cloudapp.azure.com', // your real frontend origin
+// ];
+
+// app.use(cors({
+//   origin: (origin, cb) => {
+//     // allow non-browser tools (no origin) and whitelisted origins
+//     if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
+//     return cb(new Error('Not allowed by CORS'));
+//   },
+//   credentials: true,
+// }));
+
+
 // SESSION SET UP 
 app.use(
     session({
         secret: 'SECRET KEY',
         resave: false,
-        saveUninitialized: true,
+        saveUninitialized: false,
         store: MongoStore.create({
             mongoUrl: uri,
             ttl: 14 * 24 * 60 * 60,
@@ -77,9 +96,10 @@ app.get('/session', async (req, res) => {
 
         res.json({
             _id: user._id.toString(),
-            id: user.id.toString(),
+            id: user.id != null ? String(user.id) : null,
             firstName: user.firstName,
-            lastName: user.lastName
+            lastName: user.lastName,
+            isProf: user.isProf || false
         });
     } catch (err) {
         console.error('Session fetch failed:', err);
@@ -94,9 +114,12 @@ const entryCollection = database.collection("Entries");
 
 app.post("/login", async (req, res) => {
     const { email, password } = req.body;
+    // console.log("Login attempt for email:", email);
+    // console.log("Request body:", req.body);
 
     try {
         const user = await userCollection.findOne({ email });
+        //console.log("hello");
 
         if (!user) {
             return res.status(400).json({ message: "User not found" });
@@ -105,13 +128,14 @@ app.post("/login", async (req, res) => {
         const match = await bcrypt.compare(password, user.password);
 
         if (match) {
-        //if (password == user.password) {
+            //if (password == user.password) {
             req.session.user = {
                 _id: user._id,
                 id: user.id,
                 email: user.email,
                 firstName: user.firstName,
-                lastName: user.lastName
+                lastName: user.lastName,
+                isProf: user.isProf
             };
 
             req.session.userId = user._id.toString();
@@ -162,7 +186,8 @@ app.post("/signUp", async (req, res) => {
             lastName,
             email,
             //password
-            password: hashedPassword
+            password: hashedPassword,
+            isProf: false
 
         });
 
@@ -171,7 +196,8 @@ app.post("/signUp", async (req, res) => {
             id: newId,
             email,
             firstName,
-            lastName
+            lastName,
+            isProf
         };
 
         req.session.userId = newUser.insertedId.toString();
@@ -186,106 +212,225 @@ app.post("/signUp", async (req, res) => {
 });
 
 app.post("/logEntry", async (req, res) => {
-
     try {
-        const { roomNum, date, profName, timeIn, timeOut } = req.body;
-
-        const userId = req.session.userId;
-        if (!userId) {
+        const studentIdStr = req.session.userId;
+        if (!studentIdStr) {
             return res.status(401).json({ success: false, message: "Unauthorized. Please log in." });
         }
 
+        const { roomNum, date, profName, profId, timeIn, timeOut } = req.body;
+        
+        // Validate required fields
+        if (!roomNum || !date || !profId || !timeIn || !timeOut) {
+            return res.status(400).json({ success: false, message: "All fields are required." });
+        }
+
+        // Validate ObjectIds
+        if (!ObjectId.isValid(studentIdStr)) {
+            return res.status(400).json({ success: false, message: "Invalid session user id." });
+        }
+        if (!ObjectId.isValid(profId)) {
+            return res.status(400).json({ success: false, message: "Invalid professor id." });
+        }
+
+        const studentId = new ObjectId(studentIdStr);
+        const profObjectId = new ObjectId(profId);
+
+        // Ensure professor exists and isProf=true
+        const prof = await userCollection.findOne({ _id: profObjectId, isProf: true });
+        if (!prof) {
+            return res.status(400).json({ success: false, message: "Selected professor not found." });
+        }
+
+        // Get next entry ID
         const lastEntry = await entryCollection.find().sort({ id: -1 }).limit(1).toArray();
         const newId = lastEntry.length > 0 ? lastEntry[0].id + 1 : 1;
 
-
+        // Insert new entry
         const newEntry = await entryCollection.insertOne({
             id: newId,
-            userId,
+            userId: studentId,
+            profId: profObjectId,
+            profName,
             roomNum,
             date,
-            profName,
             timeIn,
-            timeOut
+            timeOut,
+            createdAt: new Date()
         });
 
         res.status(201).json({ success: true, message: "Entry insertion successful!" });
 
-
     } catch (error) {
-        res.status(500).json({ message: "Error adding entry", error: error.message });
+        console.error("Error adding entry:", error);
+        res.status(500).json({ success: false, message: "Error adding entry", error: error.message });
     }
-
 });
 
 app.post("/studentHistory", async (req, res) => {
     try {
-
         const userId = req.session.userId;
 
         if (!userId) {
             return res.status(401).json({ message: "Unauthorized. Please log in." });
         }
 
+        
+
+        // multiple search variations
+        let searchQueries = [
+            { userId: userId }  
+        ];
+
+        if (ObjectId.isValid(userId)) {
+            const userObjectId = new ObjectId(userId);
+            searchQueries.push({ userId: userObjectId });
+        }
+
+        if (typeof userId !== 'string') {
+            searchQueries.push({ userId: userId.toString() });
+        }
+
+        const query = { $or: searchQueries };
+
         const userEntries = await entryCollection
-            .find({ userId })   
-            .sort({ date: -1 })  
+            .find(query)
+            .sort({ date: -1, timeIn: -1 })
             .toArray();
+
+        
+        // if (userEntries.length > 0) {
+        //     console.log("First entry userId:", userEntries[0].userId, typeof userEntries[0].userId);
+        // }
 
         res.status(200).json({ success: true, entries: userEntries });
 
     } catch (error) {
+        console.error("Error getting history:", error);
         res.status(500).json({ message: "Error getting history", error: error.message });
     }
-
 });
 
 app.delete("/entry/:id", async (req, res) => {
-  try {
-    const entryId = parseInt(req.params.id);
-    const result = await entryCollection.deleteOne({ id: entryId });
+    try {
+        const entryId = parseInt(req.params.id);
+        const result = await entryCollection.deleteOne({ id: entryId });
 
-    if (result.deletedCount === 0) {
-      return res.status(404).json({ success: false, message: "Entry not found" });
+        if (result.deletedCount === 0) {
+            return res.status(404).json({ success: false, message: "Entry not found" });
+        }
+
+        res.json({ success: true, message: "Entry deleted" });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Failed to delete", error: error.message });
     }
-
-    res.json({ success: true, message: "Entry deleted" });
-  } catch (error) {
-    res.status(500).json({ success: false, message: "Failed to delete", error: error.message });
-  }
 });
 
-// GET single entry by ID
 app.get("/entry/:id", async (req, res) => {
-  try {
-    const entryId = parseInt(req.params.id);
-    const entry = await entryCollection.findOne({ id: entryId });
-    if (!entry) return res.status(404).json({ message: "Entry not found" });
+    try {
+        const entryId = parseInt(req.params.id);
+        const entry = await entryCollection.findOne({ id: entryId });
+        if (!entry) return res.status(404).json({ message: "Entry not found" });
 
-    res.json({ success: true, entry });
-  } catch (error) {
-    res.status(500).json({ message: "Error fetching entry", error: error.message });
-  }
+        res.json({ success: true, entry });
+    } catch (error) {
+        res.status(500).json({ message: "Error fetching entry", error: error.message });
+    }
 });
 
-// PUT to update entry
 app.put("/entry/:id", async (req, res) => {
-  try {
-    const entryId = parseInt(req.params.id);
-    const { date, profName, roomNum, timeIn, timeOut } = req.body;
+    try {
+        const entryId = parseInt(req.params.id);
+        const { date, profName, roomNum, timeIn, timeOut } = req.body;
 
-    const result = await entryCollection.updateOne(
-      { id: entryId },
-      { $set: { date, profName, roomNum, timeIn, timeOut } }
-    );
+        const result = await entryCollection.updateOne(
+            { id: entryId },
+            { $set: { date, profName, roomNum, timeIn, timeOut } }
+        );
 
-    res.json({ success: true, message: "Entry updated" });
-  } catch (error) {
-    res.status(500).json({ message: "Failed to update entry", error: error.message });
-  }
+        res.json({ success: true, message: "Entry updated" });
+    } catch (error) {
+        res.status(500).json({ message: "Failed to update entry", error: error.message });
+    }
 });
 
+app.get("/profs", async (req, res) => {
+    try {
+        const profs = await userCollection
+            .find({ isProf: true })
+            .project({ firstName: 1, lastName: 1, _id: 1 }) 
+            .toArray();
 
+        res.json({ success: true, profs });
+    } catch (error) {
+        console.error("Error fetching professors:", error);
+        res.status(500).json({ success: false, message: "Error fetching professors" });
+    }
+});
+
+app.get("/profEntries", async (req, res) => {
+    try {
+        const userId = req.session.userId;
+        if (!userId) {
+            return res.status(401).json({ success: false, message: "Unauthorized" });
+        }
+
+        // Validate and convert userId to ObjectId
+        if (!ObjectId.isValid(userId)) {
+            return res.status(400).json({ success: false, message: "Invalid user ID" });
+        }
+
+        const userObjectId = new ObjectId(userId);
+        
+        // Check if user is a professor
+        const prof = await userCollection.findOne({ _id: userObjectId });
+        if (!prof || !prof.isProf) {
+            return res.status(403).json({ success: false, message: "Forbidden: Not a professor" });
+        }
+
+        // Get entries where profId matches the current user's ObjectId
+        const entries = await entryCollection.aggregate([
+            { $match: { profId: userObjectId } }, // Match ObjectId to ObjectId
+            {
+                $lookup: {
+                    from: "Users",
+                    let: { uid: "$userId" }, // userId is stored as ObjectId in entries
+                    pipeline: [
+                        { $match: { $expr: { $eq: ["$_id", "$$uid"] } } }, // Compare ObjectId to ObjectId
+                        { $project: { firstName: 1, lastName: 1, _id: 0 } }
+                    ],
+                    as: "student"
+                }
+            },
+            { $unwind: { path: "$student", preserveNullAndEmptyArrays: true } },
+            {
+                $project: {
+                    _id: 0,
+                    id: 1,
+                    date: 1,
+                    roomNum: 1,
+                    timeIn: 1,
+                    timeOut: 1,
+                    profName: 1,
+                    studentName: {
+                        $cond: [
+                            { $ifNull: ["$student", false] },
+                            { $concat: ["$student.firstName", " ", "$student.lastName"] },
+                            "Unknown Student"
+                        ]
+                    }
+                }
+            },
+            { $sort: { date: -1, timeIn: -1 } }
+        ]).toArray();
+
+
+        res.json({ success: true, entries });
+    } catch (error) {
+        console.error("Error fetching professor entries:", error);
+        res.status(500).json({ success: false, message: "Server error" });
+    }
+});
 
 //LOGOUT ROUTE
 app.get("/logout", (req, res) => {
